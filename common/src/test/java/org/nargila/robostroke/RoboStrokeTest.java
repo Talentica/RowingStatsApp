@@ -18,7 +18,6 @@
  */
 package org.nargila.robostroke;
 
-
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
