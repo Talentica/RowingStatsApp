@@ -17,7 +17,6 @@
  * along with Talos-Rowing.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
 package org.nargila.robostroke;
 
 import org.nargila.robostroke.data.SessionRecorderConstants;
