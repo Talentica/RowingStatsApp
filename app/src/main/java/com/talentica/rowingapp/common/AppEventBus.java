@@ -1,0 +1,134 @@
+/*
+ * Copyright (c) 2011 Tal Shalif
+ * 
+ * This file is part of Talos-Rowing.
+ * 
+ * Talos-Rowing is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * Talos-Rowing is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with Talos-Rowing.  If not, see <http://www.gnu.org/licenses/>.
+ */
+package com.talentica.rowingapp.common;
+
+import android.util.Log;
+
+import com.talentica.rowingapp.common.data.DataRecord;
+
+import java.util.LinkedList;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
+
+/**
+ * Simple communication bus enabling communication between various components 
+ */
+public class AppEventBus extends Thread {
+
+	private static final int DEBUG_QUEUE_OVERFLOW_SIZE = 50;
+	private static final int DEBUG_QUEUE_WARN_SIZE = 20;
+	
+	private final LinkedBlockingQueue<DataRecord> eventQueue =
+		new LinkedBlockingQueue<DataRecord>();
+	
+	private final LinkedList<BusEventListener> listeners = new LinkedList<BusEventListener>();
+
+	private boolean shutdown;
+
+	public AppEventBus() {
+		super("RoboStrokeEventBus thread");
+		setDaemon(true);
+		start();
+	}
+	
+	public void shutdown() {
+		shutdown = true;
+		interrupt();
+	}
+	
+	@Override
+	public void run() {
+		while (!shutdown) {
+			try {
+				DataRecord event = eventQueue.take();
+
+				if (shutdown) {
+					break;
+				}
+				
+				synchronized (listeners) {
+					
+					BusEventListener[] list = listeners.toArray(new BusEventListener[listeners.size()]);
+					
+					for (BusEventListener listener: list) {
+						if (shutdown) {
+							break;
+						}
+						listener.onBusEvent(event);
+					}
+				}
+			} catch (InterruptedException e) {
+				if (!shutdown) {
+					e.printStackTrace();
+				}
+			}			
+		}
+	}
+	
+	/**
+	 * add stroke rate listener
+	 * @param listener listener object
+	 */
+	public void addBusListener(BusEventListener listener) {
+		synchronized (listeners) {
+			listeners.add(listener);
+		}
+	}
+
+	/**
+	 * remove stroke rate listener
+	 * @param listener listener object
+	 */
+	public void removeBusListener(BusEventListener listener) {
+		synchronized (listeners) {
+			listeners.remove(listener);
+		}
+	}
+
+	public void fireEvent(DataRecord event) {
+		if (shutdown) {
+			return;
+		}
+
+		if (eventQueue.size() > DEBUG_QUEUE_OVERFLOW_SIZE) {
+			Log.e("fireEvent()", "event bus overflow: event queue exceeds {} items "+ DEBUG_QUEUE_OVERFLOW_SIZE);
+		} else if (eventQueue.size() > DEBUG_QUEUE_WARN_SIZE) {
+			Log.w("fireEvent()", "event bus size warning: event queue exceeds {} items"+ DEBUG_QUEUE_WARN_SIZE);
+		}
+
+		try {
+			Log.d("fireEvent()", "event="+ event);
+			eventQueue.put(event);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+	}
+
+	public void fireEvent(DataRecord.Type type, Object data) {
+		fireEvent(new DataRecord(type, TimeUnit.MILLISECONDS.toNanos(System.currentTimeMillis()), data));		
+	}
+	
+	public void fireEvent(DataRecord.Type type, long timestamp, Object ... data) {
+		fireEvent(new DataRecord(type, timestamp, data));		
+	}
+	
+	public void fireEvent(DataRecord.Type type, long timestamp, Object data) {
+		fireEvent(new DataRecord(type, timestamp, data));		
+	}
+}

@@ -1,0 +1,27 @@
+<resources>
+    <string name="app_name">RowingStatsApp</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+    <string name="install">Install</string>
+    <string name="open_guide">Open Guide</string>
+    <string name="preference_reset_dialog_message">Would you like to reset your old Talos Rowing settings (recommended)?</string>
+    <string name="tilt_freeze_warning">Tilt freeze will stop dynamic device orientation detection. You should only continue if your device
+    is hard-attached onto the boat and you have properly leveled it. The adjustment itself will take ${CALIBRATION_SECONDS} seconds, during which the boat should not be touched.</string>
+    <string name="about">About</string>
+    <string name="license">License</string>
+    <string name="changelog">Changelog</string>
+    <string name="about_text">This is an Open Source rowing application.</string>
+    <string name="talos_remote_missing">
+        Remote required
+    </string>
+    <string name="talos_remote_missing_text">
+        In order to use Talos broadcast/receive functionality, you need to install Talos Remote.
+        \n
+        \nRemote will ask for Networking permissions.
+    </string>
+    <string name="default_session_record_dispatch_address">suyash.gupta25@gmail.com</string>
+    <string name="session_record_upload_size_too_large">File too large. Please record sessions shorter than %d minutes in length</string>
+    <string name="file_too_large">File Too Large</string>
+    <string name="about_dialog_guide_url"></string>
+    <string name="sharedUserLabel">Boat Rowing</string>
+</resources>
